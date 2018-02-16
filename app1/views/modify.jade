@@ -1,0 +1,25 @@
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    body
+        h1.col-md-4.col-md-offset-4 ModifyPassword
+        form.form-group.col-md-4.col-md-offset-4(method='post' action='/psw')
+            div.form-group
+                label oldpassword
+                input.form-control(id='psw' name='psw' placeholder='Enter your password')
+            div.form-group
+                label password
+                input.form-control(id='npsw' name='npsw' placeholder='Enter your new password')
+            div.form-group
+                label password confirm
+                input.form-control(id='npsw2' name='npsw2' placeholder='Confirm your new password')
+                input.form-control(type='hidden' name='name' value=uname)
+            input.btn.btn-primary(type='submit' value='Submit')
+
+
+//
+   Created by 89639 on 2017/8/18.
+

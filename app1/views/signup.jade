@@ -1,0 +1,22 @@
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    body
+        h1.col-md-4.col-md-offset-4 ModifyPassword
+        form.form-group.col-md-4.col-md-offset-4(method='post' action='/signup')
+          div.form-group
+            label username
+            input.form-control(id='name' name='name' placeholder='Enter your username')
+          div.form-group
+            label password
+            input.form-control(id='psw' name='psw' placeholder='Enter your password')
+          div.form-group
+            label password confirm
+            input.form-control(id='psw2' name='psw2' placeholder='Confirm your password')
+          input.btn.btn-primary(type='submit' value='Submit')
+
+
+

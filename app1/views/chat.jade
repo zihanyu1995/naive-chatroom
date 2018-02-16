@@ -1,0 +1,172 @@
+//
+   Created by 89639 on 2017/7/30.
+
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+    body
+        h2.col-md-6.col-md-offset-3 Wxx's Chatroom
+        p.col-md-6.col-md-offset-3
+            span#status
+            span ，
+            span#roomstatus
+            span , username:
+            span#notice1.notice=uname
+        p#notice.col-md-6.col-md-offset-3
+        p.col-md-6.col-md-offset-3
+          a.btn.btn-danger(href='/') Exit
+          form.form-group.col-md-6.col-md-offset-3(method='post' action='/modify')
+             input.form-control(type='hidden' name='name' value=uname)
+             input.btn.btn-info(type='submit' value='Modify Password')
+
+hr.col-md-6.col-md-offset-3
+
+div.col-md-6.col-md-offset-3
+    h3.col-md-6.col-md-offset-3  Chat Log
+
+div#msg.panel-body.chat-body.msgbox.scrollbar.col-md-6.col-md-offset-3
+
+hr.col-md-6.col-md-offset-3
+div.col-md-6.col-md-offset-3
+    textarea(id='msgsend' name='msgsend' placeholder='Input Message' rows='4').form-control
+br.col-md-6.col-md-offset-3
+div.col-md-6.col-md-offset-3
+    a.btn.btn-primary(onclick="OL_SendMsg()") Send
+hr.col-md-6.col-md-offset-3
+
+
+hr.col-md-6.col-md-offset-3
+h3.col-md-6.col-md-offset-3  System Message
+div#history.col-md-6.col-md-offset-3
+
+//script(src='/javascripts/jquery.min.js')
+script(src='https://cdn.socket.io/socket.io-1.4.5.js')
+
+script.
+    // 基本功能函数
+    function ol_pad(num, n)
+    {
+        num = ""+num
+        var temp = num;
+
+        for(var i=0;i<(n-num.length);i++)
+        {
+            temp = "0"+temp
+        }
+        return temp
+    }
+
+    function GetDateTime() {
+        var obj = new Date();
+        return (obj.getFullYear()+"/"+ol_pad(obj.getMonth()+1, 2)+"/"+ol_pad(obj.getDate(), 2)+" "+ol_pad(obj.getHours(),2)+":"+ol_pad(obj.getMinutes(),2)+":"+ol_pad(obj.getSeconds(),2));
+    }
+
+script.
+    // 发送聊天信息
+    function OL_CleanInput() {
+        var obj = document.getElementById('msgsend');
+        obj.value = "";
+    }
+    function OL_ScrollChatWin() {
+        var obj = document.getElementById('msg');
+        obj.scrollTop = obj.scrollHeight;
+    }
+    function OL_SentAction() {
+        OL_ScrollChatWin();
+        OL_CleanInput();
+    }
+    function OL_CleanNotice() {
+        document.getElementById("notice").innerHTML = "";
+    }
+    function OL_SendMsg() {
+        var msg = document.getElementById("msgsend").value;
+        if(""==msg) {
+            alert("Message cannot be empty！")
+            return -1;
+        }
+        console.log(msg);
+        send_msg(msg);
+
+        document.getElementById("msg").innerHTML += "<p class='mymsg'>"+"<span class='time'>"+GetDateTime()+"</span>"+"--- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+G_Name+": "+msg+"</p>";
+
+        OL_SentAction();
+    }
+
+
+script.
+    // 通知
+    var NoticeTimer = null;
+    function OL_ShowNotice(msg, second) {
+        NoticeTimer = null;
+        document.getElementById("notice").innerHTML = "[Message] "+msg;
+        NoticeTimer = setTimeout("OL_CleanNotice()", second*1000)
+
+        var history = document.getElementById("history");
+        history.innerHTML = "<p>[Message] "+"<span class='time'>"+GetDateTime()+"</span>" +"--- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+msg+ history.innerHTML+"</p>"
+    }
+
+script.
+    ////////////////////////////////////////////////////////////////////
+    //启动
+    var socket = io.connect('http://127.0.0.1:3000');
+
+    //发送消息
+    var G_Name = document.getElementById("notice1").innerHTML;
+
+    if(null==G_Name) {
+        G_Name = "Visitor"+Math.ceil(Math.random()*10000);
+    }
+    socket.emit('join', G_Name, function (data) {
+        console.log(data);
+    });
+
+    //监听
+    socket.on('login', function (data2) {
+
+
+        console.log(data2);
+        // 如果有重名的，要更改一个随机名称
+        G_Name = data2.username;
+        document.getElementById("status").innerHTML = "Welcome！";
+        document.getElementById("roomstatus").innerHTML = "User in chatroom: "+data2.numUsers;
+
+
+    });
+
+    socket.on('history', function (data) {
+        console.log(data);
+        document.getElementById("msg").innerHTML +=data;
+
+    });
+
+    socket.on('user_joined', function (data) {
+        console.log(data);
+        OL_ShowNotice(data.msg, 3);
+        document.getElementById("roomstatus").innerHTML = "User in chatroom: "+data.numUsers;
+    });
+
+    socket.on('user_left', function (data) {
+        console.log(data);
+        OL_ShowNotice(data.msg, 3);
+        document.getElementById("roomstatus").innerHTML = "User in chatroom: "+data.numUsers;
+    });
+
+
+
+    //发送消息
+    function send_msg(msg){
+        socket.emit('send_msg', msg,G_Name, function (data) {
+            console.log(msg);
+        });
+    }
+    // 监听消息
+    socket.on('msg_sent', function (data) {
+        console.log(data);
+
+        document.getElementById("msg").innerHTML +="<p class='mymsg'>"+"<span class='time'>"+GetDateTime()+"</span>"+"--- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+data.username+": "+data.msg+"</p>";
+        OL_ScrollChatWin();
+    });

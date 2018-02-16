@@ -1,0 +1,23 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-theme.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+  body
+    h1.col-md-4.col-md-offset-4 Welcome to wxx's chatroom.
+    form.form-group.col-md-4.col-md-offset-4(method='post' action='/chat' )
+      div.form-group
+        label username
+        input.form-control(id='name' name='name' placeholder='Enter your username')
+
+      div.form-group
+         label password
+         input.form-control(id='psw' name='psw' placeholder='Enter your password')
+
+      input.btn.btn-primary(type='submit' value='Enter')
+    form.form-group.col-md-4.col-md-offset-4(method='get' action='/signup')
+      input.btn.btn-danger(type='submit' value='Sign Up')
